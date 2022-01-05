@@ -1,0 +1,39 @@
+---
+version: "3.7"
+
+services:
+  openldap:
+    build: ./images/ldap
+    ports:
+      - "389:389"
+    #command: tail -f /dev/null
+    command: /usr/bin/start-ldap.sh
+    networks:
+      - internal
+
+  postgres:
+    build: ./images/postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=ldaptest
+      - POSTGRES_PASSWORD=ldaptest
+    networks:
+      - internal
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    container_name: phpldapadmin
+    ports:
+      - "8080:80"
+    networks:
+      - internal
+      - web
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+
+networks:
+  internal:
+  web:
+    external: true
